@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Elite Squad 2D Live Visualizer</title>
+  <title>Elite Autonomous Squad — 2D Mission Control & Management Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @keyframes pulse-glow {
@@ -11,408 +12,703 @@
     }
     @keyframes float-bubble {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+      50% { transform: translateY(-3px); }
     }
-    @keyframes flash-active {
-      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); border-color: #10b981; }
-      50% { box-shadow: 0 0 20px 4px rgba(16, 185, 129, 0.9); border-color: #34d399; }
-      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    @keyframes active-beam {
+      0% { border-color: #3b82f6; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+      50% { border-color: #10b981; box-shadow: 0 0 25px 5px rgba(16, 185, 129, 0.6); transform: translateY(-2px); }
+      100% { border-color: #3b82f6; box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
-    .pulse-avatar {
-      animation: pulse-glow 3s infinite ease-in-out;
-    }
-    .floating-bubble {
-      animation: float-bubble 4s infinite ease-in-out;
-    }
-    .active-flash {
-      animation: flash-active 1.5s ease-out;
-    }
+    .pulse-avatar { animation: pulse-glow 3s infinite ease-in-out; }
+    .floating-bubble { animation: float-bubble 4s infinite ease-in-out; }
+    .card-executing { animation: active-beam 1.4s ease-out; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased p-4 m-0 font-sans select-none min-h-screen">
-  <div class="max-w-6xl mx-auto space-y-4">
-    
-    <!-- Top Command Header -->
-    <div class="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-lg">
+<body class="bg-slate-950 text-slate-100 antialiased p-3 md:p-6 font-sans select-none min-h-screen">
+  <div class="max-w-7xl mx-auto space-y-4">
+
+    <!-- TOP GLOBAL COMMAND HEADER -->
+    <header class="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-900/90 backdrop-blur rounded-2xl border border-slate-800 shadow-xl">
       <div class="flex items-center gap-3">
         <div id="liveIndicatorDot" class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping"></div>
         <div>
-          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
-            🏢 Elite Autonomous Agency Squad <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono">Mission Control v2.0</span>
+          <h1 class="text-base md:text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            🏢 Elite Autonomous Agency Squad <span class="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono">2D Mission Control v2.0</span>
           </h1>
           <p id="liveStatusText" class="text-xs text-emerald-400 font-mono flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Connecting to live agent engine...
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Live Telemetry: 9 Autonomous Nodes Ready
           </p>
         </div>
       </div>
 
-      <div class="flex items-center gap-2.5">
-        <!-- Alias Toggle -->
-        <button id="toggleNamesBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm">
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Autonomous Heartbeat Toggle -->
+        <button id="toggleSimBtn" onclick="toggleSimulation()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+          <span id="simDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="simLabel">Auto-Telemetry: ON</span>
+        </button>
+
+        <!-- Nomenclature / Alias Toggle -->
+        <button id="toggleNamesBtn" onclick="toggleNomenclature()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm">
           <span>🏷️</span> <span id="namingModeLabel">Mode: Standard Roles</span>
         </button>
-        <!-- Manual Pulse Simulation -->
-        <button id="simulatePulseBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
-          <span>⚡</span> <span>Ping Agents</span>
+      </div>
+    </header>
+
+    <!-- GLOBAL SQUAD MISSION DISPATCHER BAR (Direct Management) -->
+    <section class="p-4 bg-gradient-to-r from-slate-900 via-indigo-950/60 to-slate-900 rounded-2xl border-2 border-indigo-500/40 shadow-2xl space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-indigo-500/20">
+        <div class="flex items-center gap-2 text-sm font-bold text-white">
+          <span class="text-lg">🎯</span>
+          <span>Global Mission Dispatcher</span>
+          <span class="text-[11px] font-normal text-indigo-300 font-mono">(Direct Command Console)</span>
+        </div>
+        <div class="text-xs text-slate-400">
+          Command individual specialists or dispatch whole-squad initiatives
+        </div>
+      </div>
+
+      <!-- Quick Launch Presets & Custom Input -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5">
+        <button onclick="dispatchPresetMission('Live Google SERP & Technical SEO Audit')" class="p-2.5 rounded-xl bg-sky-950/50 hover:bg-sky-900/70 border border-sky-500/40 text-left transition group">
+          <div class="text-xs font-bold text-sky-300 flex items-center justify-between">
+            <span>⚡ Audit pooriazamani.nl</span>
+            <span class="text-[10px] text-sky-400 group-hover:translate-x-0.5 transition">→</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1">Live TTFB, mobile meta, SSR schemas</p>
+        </button>
+
+        <button onclick="dispatchPresetMission('Verify llms.txt & SNN Subsidy Vectors')" class="p-2.5 rounded-xl bg-teal-950/50 hover:bg-teal-900/70 border border-teal-500/40 text-left transition group">
+          <div class="text-xs font-bold text-teal-300 flex items-center justify-between">
+            <span>⚡ Validate AI Citations</span>
+            <span class="text-[10px] text-teal-400 group-hover:translate-x-0.5 transition">→</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1">Check llms.txt & Perplexity vectors</p>
+        </button>
+
+        <button onclick="dispatchPresetMission('Model €2,500 Project with 50% SNN Subsidie')" class="p-2.5 rounded-xl bg-amber-950/50 hover:bg-amber-900/70 border border-amber-500/40 text-left transition group">
+          <div class="text-xs font-bold text-amber-300 flex items-center justify-between">
+            <span>⚡ Model €2,500 SNN Deal</span>
+            <span class="text-[10px] text-amber-400 group-hover:translate-x-0.5 transition">→</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1">€1,250 net client cost proposal</p>
+        </button>
+
+        <button onclick="dispatchPresetMission('Full Multi-Agent Squad Audit')" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-left transition shadow-lg shadow-indigo-600/30 flex flex-col justify-center">
+          <div class="text-xs flex items-center justify-between">
+            <span>🚀 Run Full Squad Mission</span>
+            <span>⚡</span>
+          </div>
+          <p class="text-[10px] text-indigo-100 font-normal mt-0.5">Orchestrate all 9 agent nodes</p>
         </button>
       </div>
-    </div>
+    </section>
 
-    <!-- Main Office Canvas & Grid -->
+    <!-- MAIN 2D OFFICE FLOOR & RIGHT MANAGEMENT DRAWER -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      
-      <!-- 2D Office Floor Map (2 Columns on large screens) -->
-      <div class="lg:col-span-2 relative p-4 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl overflow-hidden min-h-[580px]">
-        <!-- Blueprint Grid Background -->
+
+      <!-- 2D OFFICE FLOOR MAP (2 COLUMNS) -->
+      <main class="lg:col-span-2 relative p-4 bg-slate-900/95 rounded-2xl border border-slate-800 shadow-xl overflow-hidden space-y-4">
+        <!-- Blueprint Grid Background Pattern -->
         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:18px_18px] pointer-events-none"></div>
 
-        <!-- Zone 1: Executive Command Suite -->
-        <div class="mb-4 p-3 bg-indigo-950/20 rounded-xl border border-indigo-500/20">
-          <div class="flex items-center justify-between mb-2 pb-1 border-b border-indigo-500/10">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-              👑 Executive Strategy Suite
+        <!-- ZONE 1: EXECUTIVE COMMAND SUITE -->
+        <div class="relative p-3.5 bg-indigo-950/25 rounded-xl border border-indigo-500/30">
+          <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-indigo-500/20">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+              <span>👑</span> Executive Strategy Suite
             </span>
-            <span class="text-[10px] text-slate-400 font-mono">Stanford Generative Agents & Shape Up</span>
+            <span class="text-[10px] text-slate-400 font-mono">Park et al. Stanford & Hormozi Offers</span>
           </div>
-          <div class="grid grid-cols-2 gap-3" id="executiveZone">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="executiveZone">
             <!-- Orchestrator & Revenue Advisor -->
           </div>
         </div>
 
-        <!-- Zone 2: Search & AI Knowledge Lab -->
-        <div class="mb-4 p-3 bg-sky-950/20 rounded-xl border border-sky-500/20">
-          <div class="flex items-center justify-between mb-2 pb-1 border-b border-sky-500/10">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
-              🔍 Search & AI Engine Lab (GEO / AEO)
+        <!-- ZONE 2: SEARCH & AI ENGINE LAB (GEO / AEO) -->
+        <div class="relative p-3.5 bg-sky-950/25 rounded-xl border border-sky-500/30">
+          <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-sky-500/20">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-300 flex items-center gap-1.5">
+              <span>🔍</span> Search & AI Engine Lab (GEO / AEO)
             </span>
-            <span class="text-[10px] text-slate-400 font-mono">Princeton GEO-bench & E-E-A-T</span>
+            <span class="text-[10px] text-slate-400 font-mono">Princeton GEO-bench & Google E-E-A-T</span>
           </div>
-          <div class="grid grid-cols-2 gap-3" id="searchZone">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="searchZone">
             <!-- SEO Specialist & GEO Specialist -->
           </div>
         </div>
 
-        <!-- Zone 3: Production & Compliance Engineering -->
-        <div class="p-3 bg-emerald-950/20 rounded-xl border border-emerald-500/20">
-          <div class="flex items-center justify-between mb-2 pb-1 border-b border-emerald-500/10">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-              🛠️ Engineering, CRO & Quality Station
+        <!-- ZONE 3: ENGINEERING, CRO & GROWTH SUITE -->
+        <div class="relative p-3.5 bg-emerald-950/25 rounded-xl border border-emerald-500/30">
+          <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-emerald-500/20">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+              <span>🛠️</span> Engineering, CRO & Quality Station
             </span>
             <span class="text-[10px] text-slate-400 font-mono">Baymard CRO, WCAG 2.2 AA & 60fps RAIL</span>
           </div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="engineeringZone">
-            <!-- Copywriter, Pricing, QA, UI/UX, LinkedIn -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="engineeringZone">
+            <!-- CRO, Pricing, QA, UI/UX, LinkedIn -->
           </div>
         </div>
+      </main>
 
-      </div>
+      <!-- RIGHT SIDE: AGENT MANAGEMENT DRAWER & LIVE CONSOLE -->
+      <aside class="space-y-4">
 
-      <!-- Right Inspector & Activity Log Panel -->
-      <div class="space-y-4">
-        <!-- Inspector Card -->
-        <div id="inspectorCard" class="p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl transition-all duration-300">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <span id="inspectIcon" class="text-lg">👑</span>
-              <span id="inspectName">Chief Orchestrator</span>
-            </h3>
-            <span id="inspectBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono">Active</span>
-          </div>
-
-          <div class="space-y-2.5 text-xs">
-            <div>
-              <p class="text-[10px] uppercase font-semibold text-slate-400">Primary Role:</p>
-              <p id="inspectRole" class="font-medium text-slate-100">Chief Executive & Multi-Agent Orchestrator</p>
-            </div>
-            <div>
-              <p class="text-[10px] uppercase font-semibold text-slate-400">Scientific Basis:</p>
-              <p id="inspectScientific" class="text-[11px] text-indigo-300 font-mono">Stanford Generative Agents (Park et al., 2023) + Shape Up</p>
-            </div>
-            <div>
-              <p class="text-[10px] uppercase font-semibold text-slate-400">Current Mindset / Observation:</p>
-              <div id="inspectMindset" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-300 italic min-h-[48px]">
-                "Sprint 2.0 active. Monitoring live multi-agent execution."
+        <!-- DYNAMIC AGENT MANAGEMENT CONSOLE -->
+        <div id="agentManagementConsole" class="p-4 bg-slate-900 rounded-2xl border-2 border-indigo-500/40 shadow-xl space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span id="consoleIcon" class="text-2xl">👑</span>
+              <div>
+                <h3 id="consoleName" class="text-sm font-bold text-white leading-tight">Chief Orchestrator</h3>
+                <p id="consoleRole" class="text-[10px] text-indigo-400">Chief Executive & Multi-Agent Orchestrator</p>
               </div>
             </div>
-            <div>
-              <p class="text-[10px] uppercase font-semibold text-slate-400">Recent Output Artifact:</p>
-              <p id="inspectArtifact" class="text-[11px] text-emerald-400 font-mono truncate">github.com/generalpooria/elite-agency-squad</p>
+            <span id="consoleStatusBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono border border-emerald-500/30">IDLE</span>
+          </div>
+
+          <!-- Scientific & Methodological Basis -->
+          <div class="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px]">
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Scientific / Benchmark Basis:</p>
+            <p id="consoleScientific" class="text-slate-200 font-mono mt-0.5">Stanford Generative Agents (Park et al., 2023)</p>
+          </div>
+
+          <!-- Live Mindset / Thought Bubble -->
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider mb-1">Current Mindset / Observation:</p>
+            <div id="consoleMindset" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs text-emerald-300 italic min-h-[46px]">
+              "Coordinating agency operations and monitoring performance."
+            </div>
+          </div>
+
+          <!-- CUSTOM DIRECTIVE DISPATCH BOX (User Management) -->
+          <div class="pt-2 border-t border-slate-800 space-y-2">
+            <label class="block text-[10px] uppercase font-bold text-slate-300 tracking-wider">
+              🎮 Assign Directive to <span id="consoleAgentTarget" class="text-indigo-400">Agent</span>:
+            </label>
+            <div class="flex gap-1.5">
+              <input id="customDirectiveInput" type="text" placeholder="Type custom instruction..." class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" onkeydown="if(event.key==='Enter') dispatchCustomDirective()">
+              <button onclick="dispatchCustomDirective()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow">
+                Execute
+              </button>
+            </div>
+          </div>
+
+          <!-- 1-CLICK INSTANT ACTION PRESETS -->
+          <div class="pt-2 border-t border-slate-800">
+            <p class="text-[10px] uppercase font-bold text-slate-300 tracking-wider mb-1.5">⚡ Instant Preset Actions:</p>
+            <div id="consolePresetActions" class="space-y-1.5">
+              <!-- Dynamically rendered per selected agent -->
+            </div>
+          </div>
+
+          <!-- EXECUTION OUTPUT DRAWER -->
+          <div id="consoleOutputDrawer" class="hidden pt-2 border-t border-slate-800 space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span id="outputActionTitle" class="font-bold text-emerald-400 flex items-center gap-1">
+                <span>✓</span> Execution Output:
+              </span>
+              <button onclick="copyOutputJson()" class="text-[10px] text-slate-400 hover:text-white bg-slate-800 px-2 py-0.5 rounded">Copy</button>
+            </div>
+            <pre id="outputJsonContent" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[10px] text-slate-300 font-mono whitespace-pre-wrap max-h-[150px] overflow-y-auto"></pre>
+          </div>
+        </div>
+
+        <!-- LIVE ACTIVITY FEED -->
+        <div class="p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl space-y-2">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
+              <span>📡</span> Live Telemetry Feed
+            </h4>
+            <span id="telemetryBadge" class="text-[10px] text-emerald-400 font-mono">Connected</span>
+          </div>
+          <div id="telemetryFeed" class="space-y-1.5 text-xs max-h-[220px] overflow-y-auto pr-1">
+            <div class="p-2 rounded bg-slate-950 border border-slate-800 text-slate-400 text-[11px]">
+              Mission Control initialized. Click any agent card to inspect and dispatch orders.
             </div>
           </div>
         </div>
 
-        <!-- Live Simulation Event Feed -->
-        <div class="p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
-            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
-              <span>📡</span> Squad Activity Feed
-            </h3>
-            <span id="socketStatusBadge" class="text-[10px] text-emerald-400 font-mono">Live Socket</span>
-          </div>
-          <div id="eventFeed" class="space-y-2 text-xs max-h-[220px] overflow-y-auto pr-1">
-            <!-- Dynamically populated events -->
-          </div>
-        </div>
-      </div>
-
+      </aside>
     </div>
+
   </div>
 
   <script>
-    let isDetailedName = false;
+    // Global Agent State & Data
+    let isSquadAliases = false;
+    let autoSimActive = true;
+    let simInterval = null;
+    let selectedAgentId = 'orchestrator';
 
     const agents = [
       {
         id: 'orchestrator',
         shortName: 'Orchestrator',
-        official: 'Chief Executive Orchestrator',
+        alias: 'Houshang Khan',
         role: 'Chief Executive & Multi-Agent Orchestrator',
         icon: '👑',
         avatarBg: 'from-indigo-600 to-purple-600',
-        status: 'Orchestrating',
         thought: 'Coordinating Sprint 2.0, updating collective memory, and monitoring high-priority workflows.',
         scientific: 'Stanford Generative Agents (Park et al., 2023) + Basecamp Shape Up',
-        recentArtifact: 'Autonomous Squad v2.0 Architecture & Governance',
-        zone: 'executiveZone'
+        zone: 'executiveZone',
+        actions: [
+          { name: 'read_memory', label: 'Sync TEAM_MEMORY.md', desc: 'Sync collective agent knowledge base' }
+        ]
       },
       {
         id: 'revenue-advisor',
         shortName: 'Revenue Advisor',
-        official: 'Chief Revenue Officer',
+        alias: 'Siroos (CRO)',
         role: 'Chief Revenue Officer & High-Ticket Hunter',
         icon: '💼',
         avatarBg: 'from-amber-600 to-yellow-600',
-        status: 'Closing Deals',
         thought: 'Structuring upcoming WBSO R&D sparring session and reviewing innovation subsidy models.',
         scientific: 'Hormozi $100M Offers + Chris Voss FBI Black Swan Negotiation',
-        recentArtifact: 'WBSO R&D & SNN 50% Subsidy Revenue Framework',
-        zone: 'executiveZone'
+        zone: 'executiveZone',
+        actions: [
+          { name: 'calc_snn_deal', label: 'Model €2,500 SNN Deal', desc: 'Calculate 50% subsidy structure (€1,250 net)' },
+          { name: 'model_high_ticket', label: 'Model €4,950 Package', desc: 'Enterprise high-ticket deliverables and ROI' },
+          { name: 'wbso_sparring', label: 'WBSO.ai Sparring Strategy', desc: 'Talking points for Paul Tondeur Monday call' }
+        ]
       },
       {
         id: 'seo-specialist',
         shortName: 'SEO Specialist',
-        official: 'Lead Technical SEO Architect',
+        alias: 'Akbar (SEO)',
         role: 'Lead Technical, Local & Organic SEO Architect',
         icon: '🐺',
         avatarBg: 'from-sky-600 to-cyan-600',
-        status: 'Rank #1 Guard',
         thought: 'Validating live 154-character mobile meta description and direct SSR JSON-LD schemas.',
         scientific: 'Google Chrome Core Web Vitals (INP < 50ms) + E-E-A-T Patent',
-        recentArtifact: 'Direct SSR JSON-LD Implementation on 13 routes',
-        zone: 'searchZone'
+        zone: 'searchZone',
+        actions: [
+          { name: 'audit_live', label: 'Live SERP & Schema Audit', desc: 'Live HTTP check of pooriazamani.nl' },
+          { name: 'audit_meta', label: 'Mobile Meta Description Safe-Zone', desc: 'Validate 154-char safe limit' },
+          { name: 'check_sitemap', label: 'Sitemap & Robots.txt Indexation', desc: 'Inspect crawler directives' }
+        ]
       },
       {
         id: 'geo-specialist',
         shortName: 'GEO Specialist',
-        official: 'AI Engine Optimizer',
+        alias: 'Asghar (GEO)',
         role: 'Generative Engine Optimization Architect (GEO/AEO)',
         icon: '🧠',
         avatarBg: 'from-teal-600 to-emerald-600',
-        status: 'RAG Syncing',
         thought: 'Injecting regional innovation subsidy vectors into llms.txt for ChatGPT and Perplexity citation.',
         scientific: 'Princeton & Georgia Tech GEO-bench Empirical Research (2024)',
-        recentArtifact: 'llms.txt & llms-full.txt SNN Subsidy Integration',
-        zone: 'searchZone'
+        zone: 'searchZone',
+        actions: [
+          { name: 'verify_llms', label: 'Verify llms.txt Live', desc: 'Validate SNN subsidy and AI retrieval chunks' },
+          { name: 'audit_citations', label: 'Perplexity Citation Audit', desc: 'Test vector BLUF retrieval format' }
+        ]
       },
       {
         id: 'cro-copywriter',
         shortName: 'CRO Copywriter',
-        official: 'Behavioral Copywriter',
+        alias: 'Jafar (CRO)',
         role: 'Behavioral Copywriting & CRO Architect',
         icon: '✍️',
         avatarBg: 'from-orange-600 to-red-600',
-        status: 'Writing High-CRO',
         thought: 'Engineering high-social-proof direct response and friction-free conversion copy.',
         scientific: 'Erin Meyer (The Culture Map) + Baymard Institute CRO Data',
-        recentArtifact: 'High-Social-Proof Community Response & Tailored Motivation Letter',
-        zone: 'engineeringZone'
+        zone: 'engineeringZone',
+        actions: [
+          { name: 'draft_dutch_outreach', label: 'Draft Dutch B2B Pitch', desc: 'Direct no-fluff email for Friesland MKB' }
+        ]
       },
       {
         id: 'pricing-strategist',
         shortName: 'Pricing Strategist',
-        official: 'Contracts & Pricing Lead',
+        alias: 'Ghasem (Pricing)',
         role: 'Value-Based Pricing & Commercial Contracts Lead',
         icon: '⚖️',
         avatarBg: 'from-violet-600 to-indigo-600',
-        status: 'Margin Watch',
         thought: 'Architecting 3-tier proposals with statutory conditional cancellation clauses.',
         scientific: 'Kahneman & Tversky Prospect Theory & ProfitWell Monetization',
-        recentArtifact: '3-Tier Value Packaging (€495 / €1,190 / €2,450)',
-        zone: 'engineeringZone'
+        zone: 'engineeringZone',
+        actions: [
+          { name: 'draft_contract', label: 'Draft BW 7:400 Proposal', desc: '3-tier pricing with SNN conditional clause' }
+        ]
       },
       {
         id: 'qa-auditor',
         shortName: 'QA Auditor',
-        official: 'Lead QA & Compliance',
+        alias: 'Taghi (QA)',
         role: 'Lead QA, Mobile Ergonomics & Privacy Auditor',
         icon: '🔍',
         avatarBg: 'from-rose-600 to-pink-600',
-        status: 'Zero-Bug Lock',
         thought: 'Auditing 44x44px touch targets and ensuring zero tracking prior to explicit user opt-in.',
         scientific: 'Nielsen Norman Heuristics, Fitts Law, AVG/GDPR & WCAG 2.2 AA',
-        recentArtifact: 'Strict Zero-Hallucination & SSR HTML Validation Report',
-        zone: 'engineeringZone'
+        zone: 'engineeringZone',
+        actions: [
+          { name: 'verify_compliance', label: 'Verify AVG & Touch Ergonomics', desc: 'Check zero cookies pre-consent and touch targets' }
+        ]
       },
       {
         id: 'ui-ux-architect',
         shortName: 'UI/UX Architect',
-        official: 'Design & Motion Lead',
+        alias: 'Jamshid (UI/UX)',
         role: 'Design Systems & 60fps Motion Systems Architect',
         icon: '🎨',
         avatarBg: 'from-fuchsia-600 to-purple-600',
-        status: '60fps GPU Mode',
         thought: 'Executing lightweight OGL WebGL shaders and hardware-accelerated compositor transitions.',
         scientific: 'Google Chrome RAIL Performance Model + Gestalt UI Hierarchy',
-        recentArtifact: 'Executive Two-Column Layout with Balanced Visual Density',
-        zone: 'engineeringZone'
+        zone: 'engineeringZone',
+        actions: [
+          { name: 'audit_rail', label: 'Audit 60fps GPU Frame Budget', desc: 'Ensure GPU compositor transitions' }
+        ]
       },
       {
         id: 'linkedin-strategist',
         shortName: 'LinkedIn Strategist',
-        official: 'B2B Growth Architect',
+        alias: 'Azadbakht (B2B)',
         role: 'B2B Thought Leadership & Viral Storytelling Architect',
         icon: '🚀',
         avatarBg: 'from-blue-600 to-indigo-600',
-        status: 'Hook Tuning',
         thought: 'Engineering mobile thumb-stopping hooks to convert post impressions into qualified inbound leads.',
         scientific: 'Richard van der Blom Algorithm Study + Heath SUCCESs Model',
-        recentArtifact: 'Agentic Development Thought-Leadership Narrative Frame',
-        zone: 'engineeringZone'
+        zone: 'engineeringZone',
+        actions: [
+          { name: 'draft_post', label: 'Draft B2B LinkedIn Post', desc: 'Mobile hook + white space + DM conversion' }
+        ]
       }
     ];
 
-    function renderOffice() {
+    // Render the 2D Office Floor
+    function renderOfficeFloor() {
       ['executiveZone', 'searchZone', 'engineeringZone'].forEach(z => {
-        document.getElementById(z).innerHTML = '';
+        const el = document.getElementById(z);
+        if (el) el.innerHTML = '';
       });
 
       agents.forEach(agent => {
         const zoneEl = document.getElementById(agent.zone);
         if (!zoneEl) return;
 
-        const displayName = isDetailedName ? agent.official : agent.shortName;
-        
+        const displayName = isSquadAliases ? `${agent.alias} (${agent.shortName})` : agent.shortName;
+        const isSelected = agent.id === selectedAgentId;
+
         const card = document.createElement('div');
-        card.id = `card-${agent.id}`;
-        card.className = `p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60 hover:border-indigo-500/80 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 group shadow-sm`;
-        card.onclick = () => inspectAgent(agent.id);
+        card.id = `agent-card-${agent.id}`;
+        card.className = `p-3 rounded-xl bg-slate-900/90 border ${isSelected ? 'border-indigo-500 shadow-indigo-500/20' : 'border-slate-800'} hover:border-indigo-500 cursor-pointer transition-all duration-200 group relative flex flex-col justify-between`;
+        card.onclick = () => selectAgent(agent.id);
 
         card.innerHTML = `
-          <div class="flex items-start gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${agent.avatarBg} flex items-center justify-center text-sm shadow-md shrink-0 pulse-avatar">
-              ${agent.icon}
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center justify-between gap-1">
-                <span class="text-xs font-bold text-white group-hover:text-indigo-300 truncate">${displayName}</span>
-                <span id="dot-${agent.id}" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${agent.avatarBg} flex items-center justify-center text-sm shadow-md pulse-avatar shrink-0">
+                  ${agent.icon}
+                </div>
+                <div class="min-w-0">
+                  <h4 class="text-xs font-bold text-white group-hover:text-indigo-300 truncate">${displayName}</h4>
+                  <p class="text-[10px] text-slate-400 truncate">${agent.role}</p>
+                </div>
               </div>
-              <p class="text-[10px] text-slate-400 truncate">${agent.role}</p>
+              <span id="badge-${agent.id}" class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono shrink-0">IDLE</span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800 h-1 rounded-full mt-2 overflow-hidden">
+              <div id="prog-${agent.id}" class="h-full bg-indigo-500 w-0 transition-all duration-500"></div>
+            </div>
+
+            <!-- Dynamic Thought Bubble -->
+            <div id="bubble-${agent.id}" class="mt-2 p-1.5 rounded-lg bg-slate-950/70 border border-slate-800 text-[10px] text-slate-300 line-clamp-2 italic floating-bubble">
+              💭 "${agent.thought}"
             </div>
           </div>
-          <div id="thought-${agent.id}" class="mt-2 p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/40 text-[10px] text-slate-300 line-clamp-2 italic floating-bubble">
-            💭 "${agent.thought}"
+
+          <!-- Quick Action Button Row -->
+          <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1.5">
+            <button onclick="event.stopPropagation(); executeAgentAction('${agent.id}', '${agent.actions[0].name}')" class="flex-1 py-1 px-2 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-500/40 text-[10px] font-semibold text-indigo-300 hover:text-white transition truncate text-center">
+              ⚡ ${agent.actions[0].label}
+            </button>
+            <button onclick="event.stopPropagation(); selectAgent('${agent.id}')" class="py-1 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-[10px] text-slate-300 transition">
+              ⚙️ Manage
+            </button>
           </div>
         `;
+
         zoneEl.appendChild(card);
       });
     }
 
-    function inspectAgent(id) {
+    // Select Agent and Populate Management Console
+    function selectAgent(id) {
+      selectedAgentId = id;
       const agent = agents.find(a => a.id === id);
       if (!agent) return;
 
-      document.getElementById('inspectIcon').innerText = agent.icon;
-      document.getElementById('inspectName').innerText = isDetailedName ? agent.official : agent.shortName;
-      document.getElementById('inspectRole').innerText = agent.role;
-      document.getElementById('inspectScientific').innerText = agent.scientific;
-      document.getElementById('inspectMindset').innerText = `"${agent.thought}"`;
-      document.getElementById('inspectArtifact').innerText = agent.recentArtifact;
+      // Update card visual outlines
+      agents.forEach(a => {
+        const c = document.getElementById(`agent-card-${a.id}`);
+        if (c) {
+          if (a.id === id) {
+            c.classList.add('border-indigo-500', 'shadow-lg');
+            c.classList.remove('border-slate-800');
+          } else {
+            c.classList.remove('border-indigo-500', 'shadow-lg');
+            c.classList.add('border-slate-800');
+          }
+        }
+      });
+
+      const displayName = isSquadAliases ? `${agent.alias} (${agent.shortName})` : agent.shortName;
+      document.getElementById('consoleIcon').innerText = agent.icon;
+      document.getElementById('consoleName').innerText = displayName;
+      document.getElementById('consoleRole').innerText = agent.role;
+      document.getElementById('consoleScientific').innerText = agent.scientific;
+      document.getElementById('consoleMindset').innerText = `"${agent.thought}"`;
+      document.getElementById('consoleAgentTarget').innerText = displayName;
+
+      // Populate Presets
+      const presetContainer = document.getElementById('consolePresetActions');
+      presetContainer.innerHTML = '';
+      agent.actions.forEach(act => {
+        const btn = document.createElement('button');
+        btn.className = "w-full p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-left transition flex items-center justify-between text-xs group";
+        btn.onclick = () => executeAgentAction(agent.id, act.name);
+        btn.innerHTML = `
+          <div>
+            <div class="font-bold text-slate-200 group-hover:text-indigo-400">⚡ ${act.label}</div>
+            <div class="text-[10px] text-slate-400">${act.desc}</div>
+          </div>
+          <span class="text-xs text-indigo-400">Run →</span>
+        `;
+        presetContainer.appendChild(btn);
+      });
     }
 
-    const feed = document.getElementById('eventFeed');
-    function addEventLog(msg, isLive = false) {
+    // Set Agent State in UI
+    function setAgentState(id, status, thought = null, progress = 0) {
+      const badge = document.getElementById(`badge-${id}`);
+      const prog = document.getElementById(`prog-${id}`);
+      const bubble = document.getElementById(`bubble-${id}`);
+      const card = document.getElementById(`agent-card-${id}`);
+
+      if (badge) {
+        if (status === 'working') {
+          badge.innerText = 'WORKING...';
+          badge.className = 'text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-mono animate-pulse';
+        } else if (status === 'completed') {
+          badge.innerText = 'DONE';
+          badge.className = 'text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono';
+        } else {
+          badge.innerText = 'IDLE';
+          badge.className = 'text-[9px] px-1.5 py-0.5 rounded-full bg-slate-700/40 text-slate-400 font-mono';
+        }
+      }
+
+      if (prog) {
+        prog.style.width = `${progress}%`;
+      }
+
+      if (bubble && thought) {
+        bubble.innerHTML = `💭 "${thought}"`;
+      }
+
+      if (card && status === 'working') {
+        card.classList.add('card-executing');
+        setTimeout(() => card.classList.remove('card-executing'), 1400);
+      }
+
+      const agent = agents.find(a => a.id === id);
+      if (agent && thought) {
+        agent.thought = thought;
+      }
+
+      if (selectedAgentId === id) {
+        document.getElementById('consoleMindset').innerText = `"${thought || agent.thought}"`;
+        document.getElementById('consoleStatusBadge').innerText = status.toUpperCase();
+      }
+    }
+
+    // Log message to Live Telemetry Feed
+    function logTelemetry(msg, isHighlight = false) {
+      const feed = document.getElementById('telemetryFeed');
       const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const item = document.createElement('div');
-      item.className = `p-1.5 rounded ${isLive ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' : 'bg-slate-800/60 border-slate-700/30 text-slate-300'} border flex items-center justify-between gap-2 text-[11px] transition-all`;
+      item.className = `p-1.5 rounded ${isHighlight ? 'bg-indigo-950/70 border border-indigo-500/40 text-indigo-200' : 'bg-slate-950 border border-slate-800 text-slate-300'} flex items-center justify-between gap-2 text-[11px]`;
       item.innerHTML = `<span class="truncate">${msg}</span><span class="text-[9px] text-slate-500 font-mono shrink-0">${time}</span>`;
       feed.prepend(item);
     }
 
-    function triggerAgentActivity(agentId, thought) {
-      const card = document.getElementById(`card-${agentId}`);
-      if (card) {
-        card.classList.remove('active-flash');
-        void card.offsetWidth;
-        card.classList.add('active-flash');
-      }
-      const thoughtEl = document.getElementById(`thought-${agentId}`);
-      if (thoughtEl && thought) {
-        thoughtEl.innerHTML = `💭 "${thought}"`;
-      }
-      const agent = agents.find(a => a.id === agentId);
-      if (agent) {
-        agent.thought = thought;
+    // Execute Agent Action
+    async function executeAgentAction(agentId, actionName) {
+      selectAgent(agentId);
+      logTelemetry(`🚀 Dispatched: ${actionName} to [${agentId}]...`, true);
+      setAgentState(agentId, 'working', `Executing task: ${actionName}...`, 50);
+
+      try {
+        const resp = await fetch(`/api/action/${agentId}/${actionName}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await resp.json();
+
+        setAgentState(agentId, 'completed', data.summary || `Task ${actionName} finished.`, 100);
+        setTimeout(() => setAgentState(agentId, 'idle', null, 0), 4000);
+
+        // Display in console drawer
+        const drawer = document.getElementById('consoleOutputDrawer');
+        const title = document.getElementById('outputActionTitle');
+        const content = document.getElementById('outputJsonContent');
+
+        drawer.classList.remove('hidden');
+        title.innerHTML = `✓ Result: ${data.action || actionName}`;
+        content.innerText = JSON.stringify(data, null, 2);
+
+        logTelemetry(`✓ [${agentId}] Completed: ${data.summary || 'Success'}`, true);
+      } catch (err) {
+        setAgentState(agentId, 'idle', `Error: ${err.message}`, 0);
+        logTelemetry(`❌ Error executing ${actionName}: ${err.message}`, true);
       }
     }
 
-    let socket = null;
+    // Dispatch Custom Directive
+    async function dispatchCustomDirective() {
+      const input = document.getElementById('customDirectiveInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const agentId = selectedAgentId;
+      input.value = '';
+      logTelemetry(`🎮 User assigned order to [${agentId}]: "${text}"`, true);
+      setAgentState(agentId, 'working', `Processing directive: "${text}"`, 40);
+
+      try {
+        const resp = await fetch(`/api/agent/${agentId}/custom_task`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: text })
+        });
+        const data = await resp.json();
+
+        setAgentState(agentId, 'completed', data.summary, 100);
+        setTimeout(() => setAgentState(agentId, 'idle', null, 0), 4000);
+
+        const drawer = document.getElementById('consoleOutputDrawer');
+        drawer.classList.remove('hidden');
+        document.getElementById('outputActionTitle').innerHTML = `✓ Custom Order Completed`;
+        document.getElementById('outputJsonContent').innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        logTelemetry(`❌ Directive error: ${err.message}`, true);
+      }
+    }
+
+    // Dispatch Global Squad Mission
+    async function dispatchPresetMission(missionTitle) {
+      logTelemetry(`🌟 INITIATING GLOBAL SQUAD MISSION: "${missionTitle}"`, true);
+      try {
+        const resp = await fetch(`/api/mission/dispatch`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mission: missionTitle })
+        });
+        const data = await resp.json();
+        logTelemetry(`✓ Global Mission dispatched: ${data.mission}`, true);
+      } catch (err) {
+        logTelemetry(`❌ Mission dispatch error: ${err.message}`, true);
+      }
+    }
+
+    function copyOutputJson() {
+      const txt = document.getElementById('outputJsonContent').innerText;
+      navigator.clipboard.writeText(txt);
+      logTelemetry('Copied execution JSON to clipboard.');
+    }
+
+    // Toggle Nomenclature / Squad Aliases
+    function toggleNomenclature() {
+      isSquadAliases = !isSquadAliases;
+      document.getElementById('namingModeLabel').innerText = isSquadAliases 
+        ? 'Mode: Squad Aliases (Akbar, Siroos...)' 
+        : 'Mode: Standard Roles';
+      renderOfficeFloor();
+      selectAgent(selectedAgentId);
+      logTelemetry(`Switched mode to: ${isSquadAliases ? 'Squad Aliases' : 'Standard Roles'}`);
+    }
+
+    // Toggle Autonomous Background Heartbeat
+    function toggleSimulation() {
+      autoSimActive = !autoSimActive;
+      const dot = document.getElementById('simDot');
+      const label = document.getElementById('simLabel');
+      if (autoSimActive) {
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        label.innerText = 'Auto-Telemetry: ON';
+        startHeartbeat();
+        logTelemetry('Autonomous background simulation enabled.');
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-slate-500';
+        label.innerText = 'Auto-Telemetry: OFF';
+        clearInterval(simInterval);
+        logTelemetry('Autonomous background simulation paused.');
+      }
+    }
+
+    function startHeartbeat() {
+      clearInterval(simInterval);
+      simInterval = setInterval(() => {
+        if (!autoSimActive) return;
+        const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+        const observations = [
+          "Verifying HTTP TTFB latency against Leeuwarden local baseline...",
+          "Checking SNN subsidy application guidelines for North Netherlands...",
+          "Validating schema.org JSON-LD microdata on Next.js App Router...",
+          "Auditing mobile touch targets for WCAG 2.2 AA accessibility...",
+          "Synthesizing inbound lead queries and pricing anchors..."
+        ];
+        const randomObs = observations[Math.floor(Math.random() * observations.length)];
+        setAgentState(randomAgent.id, 'idle', randomObs, 0);
+      }, 7000);
+    }
+
+    // Connect WebSocket
     function connectLiveWebSocket() {
       const wsUrl = `ws://${window.location.hostname || '127.0.0.1'}:8000/ws`;
-      socket = new WebSocket(wsUrl);
+      const ws = new WebSocket(wsUrl);
 
-      socket.onopen = () => {
-        document.getElementById('liveStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Live Telemetry: Connected to Agent Engine`;
-        document.getElementById('socketStatusBadge').innerText = 'Connected (Live WS)';
-        document.getElementById('socketStatusBadge').className = 'text-[10px] text-emerald-400 font-mono';
-        addEventLog('Connected to real-time engine WebSocket stream.', true);
+      ws.onopen = () => {
+        document.getElementById('liveStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-ping"></span> Live Telemetry: 9 Autonomous Nodes Ready`;
+        document.getElementById('telemetryBadge').innerText = 'Connected (Interactive)';
+        document.getElementById('telemetryBadge').className = 'text-[10px] text-emerald-400 font-mono';
+        logTelemetry('Connected to Agent Kernel via WebSocket.', true);
       };
 
-      socket.onmessage = (event) => {
+      ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          if (data.type === 'agent_live_event' || data.type === 'agent_history') {
+          if (data.type === 'agent_live_event') {
             const agentId = data.agent ? data.agent.id : 'orchestrator';
-            const agentName = data.agent ? data.agent.name : 'Orchestrator';
-            triggerAgentActivity(agentId, data.thought);
-            addEventLog(`[${agentName}] ${data.thought}`, true);
+            const progress = data.status === 'working' ? 65 : (data.status === 'completed' ? 100 : 0);
+            setAgentState(agentId, data.status || 'working', data.thought, progress);
+            logTelemetry(`[${agentId}] ${data.thought}`, true);
+
+            if (data.status === 'completed') {
+              setTimeout(() => setAgentState(agentId, 'idle', null, 0), 4000);
+            }
           }
-        } catch (err) {
-          console.error('WS Parse Error:', err);
+        } catch (e) {
+          console.error(e);
         }
       };
 
-      socket.onclose = () => {
-        document.getElementById('liveStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span> Standalone Mode (Run python server.py for live stream)`;
-        document.getElementById('socketStatusBadge').innerText = 'Standalone Mode';
-        document.getElementById('socketStatusBadge').className = 'text-[10px] text-amber-400 font-mono';
+      ws.onclose = () => {
+        document.getElementById('liveStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Reconnecting to Agent Kernel...`;
         setTimeout(connectLiveWebSocket, 3000);
-      };
-
-      socket.onerror = () => {
-        socket.close();
       };
     }
 
-    document.getElementById('toggleNamesBtn').onclick = () => {
-      isDetailedName = !isDetailedName;
-      document.getElementById('namingModeLabel').innerText = isDetailedName 
-        ? 'Mode: Full Official Roles' 
-        : 'Mode: Standard Roles';
-      renderOffice();
-      addEventLog(`Switched nomenclature to: ${isDetailedName ? 'Full Official Roles' : 'Standard Roles'}`);
-    };
-
-    document.getElementById('simulatePulseBtn').onclick = () => {
-      const randIdx = Math.floor(Math.random() * agents.length);
-      const targetAgent = agents[randIdx];
-      triggerAgentActivity(targetAgent.id, 'Pinged via mission control. All systems operational.');
-      addEventLog(`⚡ Pinged ${targetAgent.shortName} — Verified 100% active.`);
-    };
-
-    renderOffice();
-    inspectAgent('orchestrator');
+    // Init
+    renderOfficeFloor();
+    selectAgent('orchestrator');
     connectLiveWebSocket();
+    startHeartbeat();
   </script>
 </body>
 </html>
