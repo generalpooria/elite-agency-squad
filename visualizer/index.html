@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Elite Squad 2D Office Visualizer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    @keyframes float-bubble {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .pulse-avatar {
+      animation: pulse-glow 3s infinite ease-in-out;
+    }
+    .floating-bubble {
+      animation: float-bubble 4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased p-4 m-0 font-sans select-none min-h-screen">
+  <div class="max-w-6xl mx-auto space-y-4">
+    
+    <!-- Top Command Header -->
+    <div class="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-lg">
+      <div class="flex items-center gap-3">
+        <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping"></div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
+            🏢 Elite Autonomous Agency Squad <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono">v2.0 Active</span>
+          </h1>
+          <p class="text-xs text-slate-400">Stanford Generative Agents Multi-Node Live Simulation</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <!-- Alias Toggle -->
+        <button id="toggleNamesBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm">
+          <span>🏷️</span> <span id="namingModeLabel">Mode: Personal Aliases (هوشنگ، اکبر)</span>
+        </button>
+        <!-- Pulse Simulation -->
+        <button id="simulatePulseBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
+          <span>⚡</span> <span>Trigger Task Pulse</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Office Canvas & Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      
+      <!-- 2D Office Floor Map (2 Columns on large screens) -->
+      <div class="lg:col-span-2 relative p-4 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl overflow-hidden min-h-[580px]">
+        <!-- Blueprint Grid Background -->
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:18px_18px] pointer-events-none"></div>
+
+        <!-- Zone 1: Executive Command Suite -->
+        <div class="mb-4 p-3 bg-indigo-950/20 rounded-xl border border-indigo-500/20">
+          <div class="flex items-center justify-between mb-2 pb-1 border-b border-indigo-500/10">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+              👑 Executive Strategy Suite
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">Park et al. Stanford & Shape Up</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3" id="executiveZone">
+            <!-- Orchestrator & Revenue Advisor -->
+          </div>
+        </div>
+
+        <!-- Zone 2: Search & AI Knowledge Lab -->
+        <div class="mb-4 p-3 bg-sky-950/20 rounded-xl border border-sky-500/20">
+          <div class="flex items-center justify-between mb-2 pb-1 border-b border-sky-500/10">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+              🔍 Search & AI Engine Lab (GEO / AEO)
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">Princeton GEO-bench & E-E-A-T</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3" id="searchZone">
+            <!-- SEO Specialist & GEO Specialist -->
+          </div>
+        </div>
+
+        <!-- Zone 3: Production & Compliance Engineering -->
+        <div class="p-3 bg-emerald-950/20 rounded-xl border border-emerald-500/20">
+          <div class="flex items-center justify-between mb-2 pb-1 border-b border-emerald-500/10">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              🛠️ Engineering, CRO & Quality Station
+            </span>
+            <span class="text-[10px] text-slate-400 font-mono">Baymard CRO, WCAG 2.2 AA & 60fps RAIL</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="engineeringZone">
+            <!-- Jafar, Ghasem, Taghi, Jamshid, Azadbakht -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Inspector & Activity Log Panel -->
+      <div class="space-y-4">
+        <!-- Inspector Card -->
+        <div id="inspectorCard" class="p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl transition-all duration-300">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span id="inspectIcon" class="text-lg">👑</span>
+              <span id="inspectName">Houshang Khan (هوشنگ خان)</span>
+            </h3>
+            <span id="inspectBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono">Active</span>
+          </div>
+
+          <div class="space-y-2.5 text-xs">
+            <div>
+              <p class="text-[10px] uppercase font-semibold text-slate-400">Primary Role:</p>
+              <p id="inspectRole" class="font-medium text-slate-100">Chief Executive & Multi-Agent Orchestrator</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-semibold text-slate-400">Scientific Basis:</p>
+              <p id="inspectScientific" class="text-[11px] text-indigo-300 font-mono">Stanford Generative Agents (Park et al., 2023) + Shape Up</p>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-semibold text-slate-400">Current Mindset / Observation:</p>
+              <div id="inspectMindset" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-300 italic">
+                "Sprint 2.0 active. Dispatched high-priority application to New Story for Agentic Development role."
+              </div>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase font-semibold text-slate-400">Recent Output Artifact:</p>
+              <p id="inspectArtifact" class="text-[11px] text-emerald-400 font-mono">github.com/generalpooria/elite-agency-squad</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Simulation Event Feed -->
+        <div class="p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-xl">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
+              <span>📡</span> Squad Activity Feed
+            </h3>
+            <span class="text-[10px] text-emerald-400 font-mono">Live Socket</span>
+          </div>
+          <div id="eventFeed" class="space-y-2 text-xs max-h-[220px] overflow-y-auto pr-1">
+            <!-- Dynamically populated events -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let isPersonalAlias = true;
+
+    const agents = [
+      {
+        id: 'orchestrator',
+        alias: 'هوشنگ خان (Houshang)',
+        official: 'Chief Orchestrator',
+        role: 'Chief Executive & Multi-Agent Orchestrator',
+        icon: '👑',
+        avatarBg: 'from-indigo-600 to-purple-600',
+        status: 'Orchestrating',
+        statusColor: 'emerald',
+        thought: 'هدایت اسپرینت ۲.۰، ثبت حافظه جمعی و نظارت بر موقعیت New Story',
+        scientific: 'Stanford Generative Agents (Park et al., 2023) + Basecamp Shape Up',
+        recentArtifact: 'Autonomous Squad v2.0 Architecture & Governance',
+        zone: 'executiveZone'
+      },
+      {
+        id: 'revenue-advisor',
+        alias: 'سیروس (Siroos)',
+        official: 'Chief Revenue Officer',
+        role: 'Chief Revenue Officer & High-Ticket Hunter',
+        icon: '💼',
+        avatarBg: 'from-amber-600 to-yellow-600',
+        status: 'Closing Deals',
+        statusColor: 'emerald',
+        thought: 'آماده‌سازی جلسه دوشنبه با پاول (WBSO) و نظارت بر فاکتورهای SNN',
+        scientific: 'Hormozi $100M Offers + Chris Voss FBI Black Swan Negotiation',
+        recentArtifact: 'WBSO R&D & SNN 50% Subsidie Revenue Framework',
+        zone: 'executiveZone'
+      },
+      {
+        id: 'seo-specialist',
+        alias: 'اکبر (Akbar)',
+        official: 'Lead Technical SEO',
+        role: 'Lead Technical, Local & Organic SEO Architect',
+        icon: '🐺',
+        avatarBg: 'from-sky-600 to-cyan-600',
+        status: 'Rank #1 Guard',
+        statusColor: 'emerald',
+        thought: 'تایید لایو متادیسکریپشن ۱۵۴ کاراکتری و اسکیماهای SSR بدون کلاینت هیدریشن',
+        scientific: 'Google Chrome Core Web Vitals (INP < 50ms) + E-E-A-T Patent',
+        recentArtifact: 'Direct SSR JSON-LD Implementation on 13 routes',
+        zone: 'searchZone'
+      },
+      {
+        id: 'geo-specialist',
+        alias: 'اصغر (Asghar)',
+        official: 'AI Engine Optimizer',
+        role: 'Generative Engine Optimization Architect (GEO/AEO)',
+        icon: '🧠',
+        avatarBg: 'from-teal-600 to-emerald-600',
+        status: 'RAG Syncing',
+        statusColor: 'emerald',
+        thought: 'تزریق وکتورهای سوبسید SNN شمال هلند به llms.txt برای استناد ChatGPT',
+        scientific: 'Princeton & Georgia Tech GEO-bench Empirical Research (2024)',
+        recentArtifact: 'llms.txt & llms-full.txt SNN Subsidie Integration',
+        zone: 'searchZone'
+      },
+      {
+        id: 'cro-copywriter',
+        alias: 'جعفر (Jafar)',
+        official: 'CRO Copywriter',
+        role: 'Behavioral Copywriting & CRO Architect',
+        icon: '✍️',
+        avatarBg: 'from-orange-600 to-red-600',
+        status: 'Writing High-CRO',
+        statusColor: 'emerald',
+        thought: 'پاسخ هلندی گرم و بدون تعارف به کامنت هانس‌هنک در زویدربورن',
+        scientific: 'Erin Meyer (The Culture Map) + Baymard Institute CRO Data',
+        recentArtifact: 'Nextdoor High-Social-Proof Response & New Story Letter',
+        zone: 'engineeringZone'
+      },
+      {
+        id: 'pricing-strategist',
+        alias: 'قاسم (Ghasem)',
+        official: 'Pricing & Contracts',
+        role: 'Value-Based Pricing & Commercial Contracts Lead',
+        icon: '⚖️',
+        avatarBg: 'from-violet-600 to-indigo-600',
+        status: 'Margin Watch',
+        statusColor: 'emerald',
+        thought: 'طراحی قراردادهای رسمی هلندی با بند شروط فسخ سوبسید (BW)',
+        scientific: 'Kahneman & Tversky Prospect Theory & ProfitWell Monetization',
+        recentArtifact: '3-Tier Value Packaging (€495 / €1,190 / €2,450)',
+        zone: 'engineeringZone'
+      },
+      {
+        id: 'qa-auditor',
+        alias: 'تقی (Taghi)',
+        official: 'Lead QA & Privacy',
+        role: 'Lead QA, Mobile Ergonomics & Privacy Auditor',
+        icon: '🔍',
+        avatarBg: 'from-rose-600 to-pink-600',
+        status: 'Zero-Bug Lock',
+        statusColor: 'emerald',
+        thought: 'تست ارگونومی لمسی ۴۴×۴۴ پیکسل و تضمین عدم لود ترکینگ قبل کانسنت',
+        scientific: 'Nielsen Norman Heuristics, Fitts Law, AVG/GDPR & WCAG 2.2 AA',
+        recentArtifact: 'Strict Zero-Hallucination & SSR HTML Validation Report',
+        zone: 'engineeringZone'
+      },
+      {
+        id: 'ui-ux-architect',
+        alias: 'جمشید (Jamshid)',
+        official: 'Design & Motion',
+        role: 'Design Systems & 60fps Motion Systems Architect',
+        icon: '🎨',
+        avatarBg: 'from-fuchsia-600 to-purple-600',
+        status: '60fps GPU Mode',
+        statusColor: 'emerald',
+        thought: 'رندرینگ سبک شیدرهای OGL WebGL Threads با صفر میلی‌ثانیه پرش CLS',
+        scientific: 'Google Chrome RAIL Performance Model + Gestalt UI Hierarchy',
+        recentArtifact: 'Executive Two-Column CV Layout with Perfect Visual Ratio',
+        zone: 'engineeringZone'
+      },
+      {
+        id: 'linkedin-strategist',
+        alias: 'آقای آزادبخت (Azadbakht)',
+        official: 'B2B Thought Leader',
+        role: 'B2B Thought Leadership & Viral Storytelling Architect',
+        icon: '🚀',
+        avatarBg: 'from-blue-600 to-indigo-600',
+        status: 'Hook Tuning',
+        statusColor: 'emerald',
+        thought: 'مهندسی قلاب‌های ۲ خطی موبایل برای تبدیل ایمپرشن به لید دایرکت',
+        scientific: 'Richard van der Blom Algorithm Study + Heath SUCCESs Model',
+        recentArtifact: 'Agentic Development Thought-Leadership Narrative Frame',
+        zone: 'engineeringZone'
+      }
+    ];
+
+    function renderOffice() {
+      ['executiveZone', 'searchZone', 'engineeringZone'].forEach(z => {
+        document.getElementById(z).innerHTML = '';
+      });
+
+      agents.forEach(agent => {
+        const zoneEl = document.getElementById(agent.zone);
+        if (!zoneEl) return;
+
+        const displayName = isPersonalAlias ? agent.alias : agent.official;
+        
+        const card = document.createElement('div');
+        card.className = `p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60 hover:border-indigo-500/80 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 group shadow-sm`;
+        card.onclick = () => inspectAgent(agent.id);
+
+        card.innerHTML = `
+          <div class="flex items-start gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br ${agent.avatarBg} flex items-center justify-center text-sm shadow-md shrink-0 pulse-avatar">
+              ${agent.icon}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-xs font-bold text-white group-hover:text-indigo-300 truncate">${displayName}</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+              </div>
+              <p class="text-[10px] text-slate-400 truncate">${agent.role}</p>
+            </div>
+          </div>
+          <div class="mt-2 p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/40 text-[10px] text-slate-300 line-clamp-2 italic floating-bubble">
+            💭 "${agent.thought}"
+          </div>
+        `;
+        zoneEl.appendChild(card);
+      });
+    }
+
+    function inspectAgent(id) {
+      const agent = agents.find(a => a.id === id);
+      if (!agent) return;
+
+      document.getElementById('inspectIcon').innerText = agent.icon;
+      document.getElementById('inspectName').innerText = isPersonalAlias ? agent.alias : agent.official;
+      document.getElementById('inspectRole').innerText = agent.role;
+      document.getElementById('inspectScientific').innerText = agent.scientific;
+      document.getElementById('inspectMindset').innerText = `"${agent.thought}"`;
+      document.getElementById('inspectArtifact').innerText = agent.recentArtifact;
+
+      addEventLog(`Inspected: ${isPersonalAlias ? agent.alias : agent.official} — ${agent.status}`);
+    }
+
+    const feed = document.getElementById('eventFeed');
+    function addEventLog(msg) {
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const item = document.createElement('div');
+      item.className = 'p-1.5 rounded bg-slate-800/60 border border-slate-700/30 flex items-center justify-between gap-2 text-[11px]';
+      item.innerHTML = `<span class="text-slate-300 truncate">${msg}</span><span class="text-[9px] text-slate-500 font-mono shrink-0">${time}</span>`;
+      feed.prepend(item);
+    }
+
+    document.getElementById('toggleNamesBtn').onclick = () => {
+      isPersonalAlias = !isPersonalAlias;
+      document.getElementById('namingModeLabel').innerText = isPersonalAlias 
+        ? 'Mode: Personal Aliases (هوشنگ، اکبر)' 
+        : 'Mode: Global Roles (Orchestrator, SEO)';
+      renderOffice();
+      addEventLog(`Switched nomenclature to: ${isPersonalAlias ? 'Personal Aliases' : 'Global Roles'}`);
+    };
+
+    document.getElementById('simulatePulseBtn').onclick = () => {
+      addEventLog('⚡ Orchestrator dispatched sprint task pulse to all specialists.');
+      const randIdx = Math.floor(Math.random() * agents.length);
+      const targetAgent = agents[randIdx];
+      addEventLog(`✓ ${targetAgent.official} verified task execution with 0 hallucinations.`);
+    };
+
+    renderOffice();
+    inspectAgent('orchestrator');
+    addEventLog('Squad Office visualizer mounted successfully.');
+    addEventLog('All 9 agents connected to shared TEAM_MEMORY.md pipeline.');
+  </script>
+</body>
+</html>
