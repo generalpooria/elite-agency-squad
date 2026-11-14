@@ -42,6 +42,11 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
+        <!-- View Last Result Button -->
+        <button id="viewLastResultBtn" onclick="openResultModal()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600/90 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
+          <span>📋</span> <span>View Last Result</span>
+        </button>
+
         <!-- Autonomous Heartbeat Toggle -->
         <button id="toggleSimBtn" onclick="toggleSimulation()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
           <span id="simDot" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -562,6 +567,9 @@
         title.innerHTML = `✓ Result: ${data.action || actionName}`;
         content.innerText = JSON.stringify(data, null, 2);
 
+        // Pop open central visual modal
+        openResultModal(data, agentId);
+
         logTelemetry(`✓ [${agentId}] Completed: ${data.summary || 'Success'}`, true);
       } catch (err) {
         setAgentState(agentId, 'idle', `Error: ${err.message}`, 0);
@@ -595,6 +603,9 @@
         drawer.classList.remove('hidden');
         document.getElementById('outputActionTitle').innerHTML = `✓ Custom Order Completed`;
         document.getElementById('outputJsonContent').innerText = JSON.stringify(data, null, 2);
+
+        // Pop open central visual modal
+        openResultModal(data, agentId);
       } catch (err) {
         logTelemetry(`❌ Directive error: ${err.message}`, true);
       }
@@ -611,6 +622,18 @@
         });
         const data = await resp.json();
         logTelemetry(`✓ Global Mission dispatched: ${data.mission}`, true);
+        openResultModal({
+          action: data.mission,
+          status: 'success',
+          summary: 'Multi-agent sequence triggered across all 9 nodes.',
+          details: [
+            '• Orchestrator initiated high-level task breakdown.',
+            '• SEO & GEO specialists queued for live technical validation.',
+            '• Revenue Advisor & CRO aligned on subsidy proposals.',
+            '• Watch the 2D floor cards as each agent executes their cycle.'
+          ],
+          squad_status: data.squad_status
+        }, 'orchestrator');
       } catch (err) {
         logTelemetry(`❌ Mission dispatch error: ${err.message}`, true);
       }
@@ -704,11 +727,113 @@
       };
     }
 
+    // Global Result Modal Controller
+    let lastExecutionData = null;
+
+    function openResultModal(data = null, agentId = null) {
+      if (data) {
+        lastExecutionData = { data, agentId: agentId || selectedAgentId, time: new Date().toLocaleTimeString() };
+      }
+      if (!lastExecutionData) {
+        logTelemetry('No recent execution result available yet.');
+        return;
+      }
+
+      const d = lastExecutionData.data;
+      const modal = document.getElementById('resultModal');
+      const titleEl = document.getElementById('modalTitle');
+      const agentEl = document.getElementById('modalAgent');
+      const listEl = document.getElementById('modalStructuredContent');
+      const jsonEl = document.getElementById('modalJson');
+      const timeEl = document.getElementById('modalTimestamp');
+
+      titleEl.innerText = d.report_title || d.action || 'Task Execution Result';
+      agentEl.innerText = `Agent: ${lastExecutionData.agentId.toUpperCase()} • Status: ${(d.status || 'SUCCESS').toUpperCase()}`;
+      timeEl.innerText = `Executed at: ${lastExecutionData.time || 'Live'}`;
+      jsonEl.innerText = JSON.stringify(d, null, 2);
+
+      // Render structured findings
+      listEl.innerHTML = '';
+      if (d.details && Array.isArray(d.details)) {
+        d.details.forEach(item => {
+          const p = document.createElement('div');
+          p.className = 'p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-slate-200 text-xs font-mono leading-relaxed';
+          p.innerText = item;
+          listEl.appendChild(p);
+        });
+      } else if (d.summary) {
+        const p = document.createElement('div');
+        p.className = 'p-3 rounded-lg bg-slate-950/80 border border-indigo-500/30 text-indigo-200 text-xs font-mono';
+        p.innerText = `Summary: ${d.summary}`;
+        listEl.appendChild(p);
+      }
+
+      // Add key-value highlights
+      const skipKeys = ['status', 'details', 'report_title', 'action', 'agent', 'summary', 'execution_timestamp'];
+      const extraKeys = Object.keys(d).filter(k => !skipKeys.includes(k));
+      if (extraKeys.length > 0) {
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2';
+        extraKeys.slice(0, 6).forEach(k => {
+          const box = document.createElement('div');
+          box.className = 'p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px]';
+          box.innerHTML = `<span class="text-slate-400 font-mono text-[9px] uppercase">${k.replace(/_/g, ' ')}:</span><div class="font-bold text-emerald-400 truncate">${d[k]}</div>`;
+          grid.appendChild(box);
+        });
+        listEl.appendChild(grid);
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeResultModal() {
+      document.getElementById('resultModal').classList.add('hidden');
+    }
+
+    function copyModalResult() {
+      if (!lastExecutionData) return;
+      navigator.clipboard.writeText(JSON.stringify(lastExecutionData.data, null, 2));
+      logTelemetry('Copied result payload to clipboard.');
+    }
+
     // Init
     renderOfficeFloor();
     selectAgent('orchestrator');
     connectLiveWebSocket();
     startHeartbeat();
   </script>
+
+  <!-- PROMINENT GLOBAL RESULT MODAL -->
+  <div id="resultModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="relative w-full max-w-2xl bg-slate-900 border-2 border-indigo-500 rounded-2xl shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">⚡</span>
+          <div>
+            <h3 id="modalTitle" class="text-sm sm:text-base font-bold text-white">Execution Result</h3>
+            <p id="modalAgent" class="text-[10px] sm:text-xs text-indigo-400 font-mono">Specialist Output</p>
+          </div>
+        </div>
+        <button onclick="closeResultModal()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <!-- Structured Content Area -->
+      <div id="modalStructuredContent" class="space-y-2 overflow-y-auto max-h-[45vh] pr-1"></div>
+
+      <!-- Raw JSON Details Toggle -->
+      <details class="text-xs bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+        <summary class="cursor-pointer text-slate-400 font-mono select-none hover:text-white">View Raw JSON Payload</summary>
+        <pre id="modalJson" class="mt-2 text-[10px] text-slate-300 font-mono whitespace-pre-wrap max-h-36 overflow-y-auto"></pre>
+      </details>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+        <span id="modalTimestamp" class="text-[10px] text-slate-500 font-mono"></span>
+        <div class="flex gap-2">
+          <button onclick="copyModalResult()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-medium">📋 Copy</button>
+          <button onclick="closeResultModal()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs text-white font-bold">Got it</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
