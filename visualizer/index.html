@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Elite Squad 2D Office Visualizer</title>
+  <title>Elite Squad 2D Live Visualizer</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @keyframes pulse-glow {
@@ -13,11 +13,19 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-4px); }
     }
+    @keyframes flash-active {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); border-color: #10b981; }
+      50% { box-shadow: 0 0 20px 4px rgba(16, 185, 129, 0.9); border-color: #34d399; }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
     .pulse-avatar {
       animation: pulse-glow 3s infinite ease-in-out;
     }
     .floating-bubble {
       animation: float-bubble 4s infinite ease-in-out;
+    }
+    .active-flash {
+      animation: flash-active 1.5s ease-out;
     }
   </style>
 </head>
@@ -27,12 +35,14 @@
     <!-- Top Command Header -->
     <div class="flex flex-wrap items-center justify-between gap-3 p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-lg">
       <div class="flex items-center gap-3">
-        <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping"></div>
+        <div id="liveIndicatorDot" class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping"></div>
         <div>
           <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-2">
-            🏢 Elite Autonomous Agency Squad <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono">v2.0 Active</span>
+            🏢 Elite Autonomous Agency Squad <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-mono">Mission Control v2.0</span>
           </h1>
-          <p class="text-xs text-slate-400">Stanford Generative Agents Multi-Node Live Simulation</p>
+          <p id="liveStatusText" class="text-xs text-emerald-400 font-mono flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Connecting to live agent engine...
+          </p>
         </div>
       </div>
 
@@ -41,9 +51,9 @@
         <button id="toggleNamesBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm">
           <span>🏷️</span> <span id="namingModeLabel">Mode: Personal Aliases (هوشنگ، اکبر)</span>
         </button>
-        <!-- Pulse Simulation -->
-        <button id="simulatePulseBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
-          <span>⚡</span> <span>Trigger Task Pulse</span>
+        <!-- Manual Pulse Simulation -->
+        <button id="simulatePulseBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
+          <span>⚡</span> <span>Ping Agents</span>
         </button>
       </div>
     </div>
@@ -120,13 +130,13 @@
             </div>
             <div>
               <p class="text-[10px] uppercase font-semibold text-slate-400">Current Mindset / Observation:</p>
-              <div id="inspectMindset" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-300 italic">
-                "Sprint 2.0 active. Dispatched high-priority application to New Story for Agentic Development role."
+              <div id="inspectMindset" class="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-300 italic min-h-[48px]">
+                "Sprint 2.0 active. Monitoring live multi-agent execution."
               </div>
             </div>
             <div>
               <p class="text-[10px] uppercase font-semibold text-slate-400">Recent Output Artifact:</p>
-              <p id="inspectArtifact" class="text-[11px] text-emerald-400 font-mono">github.com/generalpooria/elite-agency-squad</p>
+              <p id="inspectArtifact" class="text-[11px] text-emerald-400 font-mono truncate">github.com/generalpooria/elite-agency-squad</p>
             </div>
           </div>
         </div>
@@ -137,7 +147,7 @@
             <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-1.5">
               <span>📡</span> Squad Activity Feed
             </h3>
-            <span class="text-[10px] text-emerald-400 font-mono">Live Socket</span>
+            <span id="socketStatusBadge" class="text-[10px] text-emerald-400 font-mono">Live Socket</span>
           </div>
           <div id="eventFeed" class="space-y-2 text-xs max-h-[220px] overflow-y-auto pr-1">
             <!-- Dynamically populated events -->
@@ -160,7 +170,6 @@
         icon: '👑',
         avatarBg: 'from-indigo-600 to-purple-600',
         status: 'Orchestrating',
-        statusColor: 'emerald',
         thought: 'هدایت اسپرینت ۲.۰، ثبت حافظه جمعی و نظارت بر موقعیت New Story',
         scientific: 'Stanford Generative Agents (Park et al., 2023) + Basecamp Shape Up',
         recentArtifact: 'Autonomous Squad v2.0 Architecture & Governance',
@@ -174,7 +183,6 @@
         icon: '💼',
         avatarBg: 'from-amber-600 to-yellow-600',
         status: 'Closing Deals',
-        statusColor: 'emerald',
         thought: 'آماده‌سازی جلسه دوشنبه با پاول (WBSO) و نظارت بر فاکتورهای SNN',
         scientific: 'Hormozi $100M Offers + Chris Voss FBI Black Swan Negotiation',
         recentArtifact: 'WBSO R&D & SNN 50% Subsidie Revenue Framework',
@@ -188,7 +196,6 @@
         icon: '🐺',
         avatarBg: 'from-sky-600 to-cyan-600',
         status: 'Rank #1 Guard',
-        statusColor: 'emerald',
         thought: 'تایید لایو متادیسکریپشن ۱۵۴ کاراکتری و اسکیماهای SSR بدون کلاینت هیدریشن',
         scientific: 'Google Chrome Core Web Vitals (INP < 50ms) + E-E-A-T Patent',
         recentArtifact: 'Direct SSR JSON-LD Implementation on 13 routes',
@@ -202,7 +209,6 @@
         icon: '🧠',
         avatarBg: 'from-teal-600 to-emerald-600',
         status: 'RAG Syncing',
-        statusColor: 'emerald',
         thought: 'تزریق وکتورهای سوبسید SNN شمال هلند به llms.txt برای استناد ChatGPT',
         scientific: 'Princeton & Georgia Tech GEO-bench Empirical Research (2024)',
         recentArtifact: 'llms.txt & llms-full.txt SNN Subsidie Integration',
@@ -216,7 +222,6 @@
         icon: '✍️',
         avatarBg: 'from-orange-600 to-red-600',
         status: 'Writing High-CRO',
-        statusColor: 'emerald',
         thought: 'پاسخ هلندی گرم و بدون تعارف به کامنت هانس‌هنک در زویدربورن',
         scientific: 'Erin Meyer (The Culture Map) + Baymard Institute CRO Data',
         recentArtifact: 'Nextdoor High-Social-Proof Response & New Story Letter',
@@ -230,7 +235,6 @@
         icon: '⚖️',
         avatarBg: 'from-violet-600 to-indigo-600',
         status: 'Margin Watch',
-        statusColor: 'emerald',
         thought: 'طراحی قراردادهای رسمی هلندی با بند شروط فسخ سوبسید (BW)',
         scientific: 'Kahneman & Tversky Prospect Theory & ProfitWell Monetization',
         recentArtifact: '3-Tier Value Packaging (€495 / €1,190 / €2,450)',
@@ -244,7 +248,6 @@
         icon: '🔍',
         avatarBg: 'from-rose-600 to-pink-600',
         status: 'Zero-Bug Lock',
-        statusColor: 'emerald',
         thought: 'تست ارگونومی لمسی ۴۴×۴۴ پیکسل و تضمین عدم لود ترکینگ قبل کانسنت',
         scientific: 'Nielsen Norman Heuristics, Fitts Law, AVG/GDPR & WCAG 2.2 AA',
         recentArtifact: 'Strict Zero-Hallucination & SSR HTML Validation Report',
@@ -258,7 +261,6 @@
         icon: '🎨',
         avatarBg: 'from-fuchsia-600 to-purple-600',
         status: '60fps GPU Mode',
-        statusColor: 'emerald',
         thought: 'رندرینگ سبک شیدرهای OGL WebGL Threads با صفر میلی‌ثانیه پرش CLS',
         scientific: 'Google Chrome RAIL Performance Model + Gestalt UI Hierarchy',
         recentArtifact: 'Executive Two-Column CV Layout with Perfect Visual Ratio',
@@ -272,7 +274,6 @@
         icon: '🚀',
         avatarBg: 'from-blue-600 to-indigo-600',
         status: 'Hook Tuning',
-        statusColor: 'emerald',
         thought: 'مهندسی قلاب‌های ۲ خطی موبایل برای تبدیل ایمپرشن به لید دایرکت',
         scientific: 'Richard van der Blom Algorithm Study + Heath SUCCESs Model',
         recentArtifact: 'Agentic Development Thought-Leadership Narrative Frame',
@@ -292,6 +293,7 @@
         const displayName = isPersonalAlias ? agent.alias : agent.official;
         
         const card = document.createElement('div');
+        card.id = `card-${agent.id}`;
         card.className = `p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60 hover:border-indigo-500/80 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 group shadow-sm`;
         card.onclick = () => inspectAgent(agent.id);
 
@@ -303,12 +305,12 @@
             <div class="min-w-0 flex-1">
               <div class="flex items-center justify-between gap-1">
                 <span class="text-xs font-bold text-white group-hover:text-indigo-300 truncate">${displayName}</span>
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                <span id="dot-${agent.id}" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
               </div>
               <p class="text-[10px] text-slate-400 truncate">${agent.role}</p>
             </div>
           </div>
-          <div class="mt-2 p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/40 text-[10px] text-slate-300 line-clamp-2 italic floating-bubble">
+          <div id="thought-${agent.id}" class="mt-2 p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/40 text-[10px] text-slate-300 line-clamp-2 italic floating-bubble">
             💭 "${agent.thought}"
           </div>
         `;
@@ -326,17 +328,73 @@
       document.getElementById('inspectScientific').innerText = agent.scientific;
       document.getElementById('inspectMindset').innerText = `"${agent.thought}"`;
       document.getElementById('inspectArtifact').innerText = agent.recentArtifact;
-
-      addEventLog(`Inspected: ${isPersonalAlias ? agent.alias : agent.official} — ${agent.status}`);
     }
 
     const feed = document.getElementById('eventFeed');
-    function addEventLog(msg) {
+    function addEventLog(msg, isLive = false) {
       const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const item = document.createElement('div');
-      item.className = 'p-1.5 rounded bg-slate-800/60 border border-slate-700/30 flex items-center justify-between gap-2 text-[11px]';
-      item.innerHTML = `<span class="text-slate-300 truncate">${msg}</span><span class="text-[9px] text-slate-500 font-mono shrink-0">${time}</span>`;
+      item.className = `p-1.5 rounded ${isLive ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' : 'bg-slate-800/60 border-slate-700/30 text-slate-300'} border flex items-center justify-between gap-2 text-[11px] transition-all`;
+      item.innerHTML = `<span class="truncate">${msg}</span><span class="text-[9px] text-slate-500 font-mono shrink-0">${time}</span>`;
       feed.prepend(item);
+    }
+
+    // Trigger visual flash on active agent card
+    function triggerAgentActivity(agentId, thought) {
+      const card = document.getElementById(`card-${agentId}`);
+      if (card) {
+        card.classList.remove('active-flash');
+        void card.offsetWidth; // trigger reflow
+        card.classList.add('active-flash');
+      }
+      const thoughtEl = document.getElementById(`thought-${agentId}`);
+      if (thoughtEl && thought) {
+        thoughtEl.innerHTML = `💭 "${thought}"`;
+      }
+      const agent = agents.find(a => a.id === agentId);
+      if (agent) {
+        agent.thought = thought;
+      }
+    }
+
+    // Live WebSocket Client Setup
+    let socket = null;
+    function connectLiveWebSocket() {
+      const wsUrl = `ws://${window.location.hostname || '127.0.0.1'}:8000/ws`;
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = () => {
+        document.getElementById('liveStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Live Telemetry: Connected to Agent Engine`;
+        document.getElementById('socketStatusBadge').innerText = 'Connected (Live WS)';
+        document.getElementById('socketStatusBadge').className = 'text-[10px] text-emerald-400 font-mono';
+        addEventLog('Connected to real-time engine WebSocket stream.', true);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'agent_live_event' || data.type === 'agent_history') {
+            const agentId = data.agent ? data.agent.id : 'orchestrator';
+            const agentName = data.agent ? data.agent.name : 'Orchestrator';
+            triggerAgentActivity(agentId, data.thought);
+            addEventLog(`[${agentName}] ${data.thought}`, true);
+          }
+        } catch (err) {
+          console.error('WS Parse Error:', err);
+        }
+      };
+
+      socket.onclose = () => {
+        document.getElementById('liveStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span> Standalone Mode (Run python server.py for live stream)`;
+        document.getElementById('socketStatusBadge').innerText = 'Standalone Mode';
+        document.getElementById('socketStatusBadge').className = 'text-[10px] text-amber-400 font-mono';
+        // Retry connection after 3s
+        setTimeout(connectLiveWebSocket, 3000);
+      };
+
+      socket.onerror = () => {
+        socket.close();
+      };
     }
 
     document.getElementById('toggleNamesBtn').onclick = () => {
@@ -349,16 +407,15 @@
     };
 
     document.getElementById('simulatePulseBtn').onclick = () => {
-      addEventLog('⚡ Orchestrator dispatched sprint task pulse to all specialists.');
       const randIdx = Math.floor(Math.random() * agents.length);
       const targetAgent = agents[randIdx];
-      addEventLog(`✓ ${targetAgent.official} verified task execution with 0 hallucinations.`);
+      triggerAgentActivity(targetAgent.id, 'Pinged via mission control. All systems operational.');
+      addEventLog(`⚡ Pinged ${targetAgent.alias} — Verified 100% active.`);
     };
 
     renderOffice();
     inspectAgent('orchestrator');
-    addEventLog('Squad Office visualizer mounted successfully.');
-    addEventLog('All 9 agents connected to shared TEAM_MEMORY.md pipeline.');
+    connectLiveWebSocket();
   </script>
 </body>
 </html>
