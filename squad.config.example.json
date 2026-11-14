@@ -1,0 +1,25 @@
+{
+  "$schema": "./squad.schema.json",
+  "name": "my-custom-agency-squad",
+  "version": "2.0.0",
+  "governance": {
+    "zeroHallucination": true,
+    "empiricalVerification": true,
+    "performanceBudget": {
+      "inpMs": 200,
+      "lcpSeconds": 1.2,
+      "cls": 0.05
+    }
+  },
+  "aliases": {
+    "orchestrator": "lead",
+    "revenue-advisor": "growth",
+    "seo-specialist": "seo",
+    "geo-specialist": "ai-search",
+    "cro-copywriter": "copy",
+    "pricing-strategist": "finance",
+    "qa-auditor": "qa",
+    "ui-ux-architect": "designer",
+    "linkedin-strategist": "brand"
+  }
+}

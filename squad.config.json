@@ -1,0 +1,36 @@
+{
+  "$schema": "./squad.schema.json",
+  "name": "elite-agency-squad",
+  "version": "2.0.0",
+  "governance": {
+    "zeroHallucination": true,
+    "empiricalVerification": true,
+    "performanceBudget": {
+      "inpMs": 200,
+      "lcpSeconds": 1.2,
+      "cls": 0.05
+    }
+  },
+  "defaultRoles": [
+    "orchestrator",
+    "revenue-advisor",
+    "seo-specialist",
+    "geo-specialist",
+    "cro-copywriter",
+    "pricing-strategist",
+    "qa-auditor",
+    "ui-ux-architect",
+    "linkedin-strategist"
+  ],
+  "aliases": {
+    "orchestrator": "houshang",
+    "revenue-advisor": "siroos",
+    "seo-specialist": "akbar",
+    "geo-specialist": "asghar",
+    "cro-copywriter": "jafar",
+    "pricing-strategist": "ghasem",
+    "qa-auditor": "taghi",
+    "ui-ux-architect": "jamshid",
+    "linkedin-strategist": "azadbakht"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "elite-agency-squad",
+  "displayName": "Elite Autonomous Agency Squad",
+  "version": "2.0.0",
+  "description": "An autonomous multi-agent agency framework powered by Stanford/Google Generative Agents, Princeton GEO-bench, Harvard/Baymard CRO, and Fortune 500 engineering standards.",
+  "author": "Pooria Zamani",
+  "license": "MIT",
+  "homepage": "https://pooriazamani.nl",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/generalpooria/elite-agency-squad.git"
+  },
+  "suggestedPrompts": [
+    "orchestrator: initiate agency sprint and align all specialists",
+    "revenue-advisor: analyze project monetization angles and high-ticket pricing",
+    "seo-specialist & geo-specialist: run a comprehensive technical and AI engine benchmark"
+  ]
+}
