@@ -34,7 +34,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     if any(k in full_haystack for k in ["akbar", "seo", "lighthouse", "core web vitals", "inp", "lcp", "cls", "sitemap", "robots.txt", "schema"]):
         return {
             "id": "seo-specialist",
-            "name": "اکبر (Akbar)",
+            "name": "SEO Specialist (Lead SEO)",
             "role": "Lead Technical & Local SEO Architect",
             "icon": "🐺",
             "color": "sky"
@@ -42,7 +42,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     elif any(k in full_haystack for k in ["asghar", "geo", "aeo", "perplexity", "chatgpt", "gemini", "claude", "llms.txt", "princeton", "rag"]):
         return {
             "id": "geo-specialist",
-            "name": "اصغر (Asghar)",
+            "name": "GEO Specialist (AI Engines)",
             "role": "AI Engine Optimization Architect",
             "icon": "🧠",
             "color": "teal"
@@ -50,7 +50,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     elif any(k in full_haystack for k in ["siroos", "revenue", "cro", "wbso", "paul", "tondeur", "hormozi", "deal", "cash", "money", "hunter"]):
         return {
             "id": "revenue-advisor",
-            "name": "سیروس (Siroos)",
+            "name": "Revenue Advisor (CRO)",
             "role": "Chief Revenue Officer & Hunter",
             "icon": "💼",
             "color": "amber"
@@ -58,7 +58,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     elif any(k in full_haystack for k in ["jafar", "copy", "cro-copy", "nextdoor", "hans", "buurtapp", "cialdini", "baymard"]):
         return {
             "id": "cro-copywriter",
-            "name": "جعفر (Jafar)",
+            "name": "CRO Copywriter",
             "role": "Behavioral Copywriting Architect",
             "icon": "✍️",
             "color": "orange"
@@ -66,7 +66,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     elif any(k in full_haystack for k in ["ghasem", "pricing", "contract", "offerte", "bw", "burgerlijk wetboek", "snn subsidie"]):
         return {
             "id": "pricing-strategist",
-            "name": "قاسم (Ghasem)",
+            "name": "Pricing Strategist",
             "role": "Pricing & Contracts Strategist",
             "icon": "⚖️",
             "color": "violet"
@@ -74,7 +74,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     elif any(k in full_haystack for k in ["taghi", "qa", "audit", "wcag", "avg", "gdpr", "touch target", "fitts", "nielsen"]):
         return {
             "id": "qa-auditor",
-            "name": "تقی (Taghi)",
+            "name": "QA Auditor (Compliance)",
             "role": "Lead QA & Privacy Auditor",
             "icon": "🔍",
             "color": "rose"
@@ -82,7 +82,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     elif any(k in full_haystack for k in ["jamshid", "ui-ux", "bento", "60fps", "rail", "ogl", "motion", "framer motion", "shader"]):
         return {
             "id": "ui-ux-architect",
-            "name": "جمشید (Jamshid)",
+            "name": "UI/UX Architect (Motion)",
             "role": "Design Systems & 60fps Motion",
             "icon": "🎨",
             "color": "fuchsia"
@@ -90,7 +90,7 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     elif any(k in full_haystack for k in ["azadbakht", "linkedin", "viral", "post", "hook", "storytelling"]):
         return {
             "id": "linkedin-strategist",
-            "name": "آقای آزادبخت (Azadbakht)",
+            "name": "LinkedIn Strategist",
             "role": "B2B Growth & Viral Storytelling",
             "icon": "🚀",
             "color": "blue"
@@ -98,23 +98,22 @@ def detect_agent_from_entry(entry: Dict[str, Any]) -> Dict[str, str]:
     else:
         return {
             "id": "orchestrator",
-            "name": "هوشنگ خان (Houshang)",
+            "name": "Chief Orchestrator",
             "role": "Chief Executive & Orchestrator",
             "icon": "👑",
             "color": "indigo"
         }
 
 def extract_clean_thought(entry: Dict[str, Any]) -> str:
-    """Extract a concise 1-line thought or action summary."""
+    """Extract a concise 1-line thought or action summary in English."""
     tool_calls = entry.get("tool_calls", [])
     if tool_calls and isinstance(tool_calls, list) and len(tool_calls) > 0:
         tc = tool_calls[0]
         summary = tc.get("summary") or tc.get("name") or "Executing tool"
-        return f"Executing: {summary}"
+        return f"Executing tool: {summary}"
     
     thinking = entry.get("thinking", "")
     if thinking:
-        # Take first sentence or first 120 chars
         first_line = thinking.strip().split("\n")[0]
         if len(first_line) > 130:
             first_line = first_line[:127] + "..."
@@ -127,7 +126,7 @@ def extract_clean_thought(entry: Dict[str, Any]) -> str:
             first_line = first_line[:127] + "..."
         return first_line
         
-    return "Analyzing operational context..."
+    return "Analyzing operational telemetry..."
 
 @app.get("/")
 async def get_index():
@@ -140,7 +139,6 @@ async def get_index():
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     connected_clients.append(websocket)
-    print(f"[WebSocket] Client connected! Total clients: {len(connected_clients)}")
 
     # Send initial snapshot of last 5 historical events
     try:
@@ -169,18 +167,13 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         while True:
-            # Keep connection open and receive any ping from client
-            data = await websocket.receive_text()
+            await websocket.receive_text()
     except WebSocketDisconnect:
         connected_clients.remove(websocket)
-        print(f"[WebSocket] Client disconnected. Remaining: {len(connected_clients)}")
 
 async def transcript_tailer():
     """Background task continuously tailing transcript.jsonl and broadcasting events."""
-    print("[Tailer] Starting transcript.jsonl monitor...")
     last_pos = 0
-    
-    # Initialize file pointer to near end
     if os.path.exists(TRANSCRIPT_PATH):
         last_pos = max(0, os.path.getsize(TRANSCRIPT_PATH) - 4000)
 
@@ -213,19 +206,17 @@ async def transcript_tailer():
                             }
                             msg_str = json.dumps(payload)
                             
-                            # Broadcast to all connected clients
                             for client in connected_clients:
                                 try:
                                     await client.send_text(msg_str)
                                 except Exception:
                                     pass
-                        except Exception as parse_err:
+                        except Exception:
                             pass
                 elif current_size < last_pos:
-                    # File was truncated/rotated
                     last_pos = 0
-        except Exception as e:
-            print("[Tailer] Error reading transcript:", e)
+        except Exception:
+            pass
 
         await asyncio.sleep(0.5)
 

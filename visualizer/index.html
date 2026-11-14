@@ -49,7 +49,7 @@
       <div class="flex items-center gap-2.5">
         <!-- Alias Toggle -->
         <button id="toggleNamesBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm">
-          <span>🏷️</span> <span id="namingModeLabel">Mode: Personal Aliases (هوشنگ، اکبر)</span>
+          <span>🏷️</span> <span id="namingModeLabel">Mode: Standard Roles</span>
         </button>
         <!-- Manual Pulse Simulation -->
         <button id="simulatePulseBtn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center gap-1.5 border border-slate-700">
@@ -72,7 +72,7 @@
             <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
               👑 Executive Strategy Suite
             </span>
-            <span class="text-[10px] text-slate-400 font-mono">Park et al. Stanford & Shape Up</span>
+            <span class="text-[10px] text-slate-400 font-mono">Stanford Generative Agents & Shape Up</span>
           </div>
           <div class="grid grid-cols-2 gap-3" id="executiveZone">
             <!-- Orchestrator & Revenue Advisor -->
@@ -101,7 +101,7 @@
             <span class="text-[10px] text-slate-400 font-mono">Baymard CRO, WCAG 2.2 AA & 60fps RAIL</span>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="engineeringZone">
-            <!-- Jafar, Ghasem, Taghi, Jamshid, Azadbakht -->
+            <!-- Copywriter, Pricing, QA, UI/UX, LinkedIn -->
           </div>
         </div>
 
@@ -114,7 +114,7 @@
           <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
             <h3 class="text-sm font-bold text-white flex items-center gap-2">
               <span id="inspectIcon" class="text-lg">👑</span>
-              <span id="inspectName">Houshang Khan (هوشنگ خان)</span>
+              <span id="inspectName">Chief Orchestrator</span>
             </h3>
             <span id="inspectBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-mono">Active</span>
           </div>
@@ -159,122 +159,122 @@
   </div>
 
   <script>
-    let isPersonalAlias = true;
+    let isDetailedName = false;
 
     const agents = [
       {
         id: 'orchestrator',
-        alias: 'هوشنگ خان (Houshang)',
-        official: 'Chief Orchestrator',
+        shortName: 'Orchestrator',
+        official: 'Chief Executive Orchestrator',
         role: 'Chief Executive & Multi-Agent Orchestrator',
         icon: '👑',
         avatarBg: 'from-indigo-600 to-purple-600',
         status: 'Orchestrating',
-        thought: 'هدایت اسپرینت ۲.۰، ثبت حافظه جمعی و نظارت بر موقعیت New Story',
+        thought: 'Coordinating Sprint 2.0, updating collective memory, and monitoring high-priority workflows.',
         scientific: 'Stanford Generative Agents (Park et al., 2023) + Basecamp Shape Up',
         recentArtifact: 'Autonomous Squad v2.0 Architecture & Governance',
         zone: 'executiveZone'
       },
       {
         id: 'revenue-advisor',
-        alias: 'سیروس (Siroos)',
+        shortName: 'Revenue Advisor',
         official: 'Chief Revenue Officer',
         role: 'Chief Revenue Officer & High-Ticket Hunter',
         icon: '💼',
         avatarBg: 'from-amber-600 to-yellow-600',
         status: 'Closing Deals',
-        thought: 'آماده‌سازی جلسه دوشنبه با پاول (WBSO) و نظارت بر فاکتورهای SNN',
+        thought: 'Structuring upcoming WBSO R&D sparring session and reviewing innovation subsidy models.',
         scientific: 'Hormozi $100M Offers + Chris Voss FBI Black Swan Negotiation',
-        recentArtifact: 'WBSO R&D & SNN 50% Subsidie Revenue Framework',
+        recentArtifact: 'WBSO R&D & SNN 50% Subsidy Revenue Framework',
         zone: 'executiveZone'
       },
       {
         id: 'seo-specialist',
-        alias: 'اکبر (Akbar)',
-        official: 'Lead Technical SEO',
+        shortName: 'SEO Specialist',
+        official: 'Lead Technical SEO Architect',
         role: 'Lead Technical, Local & Organic SEO Architect',
         icon: '🐺',
         avatarBg: 'from-sky-600 to-cyan-600',
         status: 'Rank #1 Guard',
-        thought: 'تایید لایو متادیسکریپشن ۱۵۴ کاراکتری و اسکیماهای SSR بدون کلاینت هیدریشن',
+        thought: 'Validating live 154-character mobile meta description and direct SSR JSON-LD schemas.',
         scientific: 'Google Chrome Core Web Vitals (INP < 50ms) + E-E-A-T Patent',
         recentArtifact: 'Direct SSR JSON-LD Implementation on 13 routes',
         zone: 'searchZone'
       },
       {
         id: 'geo-specialist',
-        alias: 'اصغر (Asghar)',
+        shortName: 'GEO Specialist',
         official: 'AI Engine Optimizer',
         role: 'Generative Engine Optimization Architect (GEO/AEO)',
         icon: '🧠',
         avatarBg: 'from-teal-600 to-emerald-600',
         status: 'RAG Syncing',
-        thought: 'تزریق وکتورهای سوبسید SNN شمال هلند به llms.txt برای استناد ChatGPT',
+        thought: 'Injecting regional innovation subsidy vectors into llms.txt for ChatGPT and Perplexity citation.',
         scientific: 'Princeton & Georgia Tech GEO-bench Empirical Research (2024)',
-        recentArtifact: 'llms.txt & llms-full.txt SNN Subsidie Integration',
+        recentArtifact: 'llms.txt & llms-full.txt SNN Subsidy Integration',
         zone: 'searchZone'
       },
       {
         id: 'cro-copywriter',
-        alias: 'جعفر (Jafar)',
-        official: 'CRO Copywriter',
+        shortName: 'CRO Copywriter',
+        official: 'Behavioral Copywriter',
         role: 'Behavioral Copywriting & CRO Architect',
         icon: '✍️',
         avatarBg: 'from-orange-600 to-red-600',
         status: 'Writing High-CRO',
-        thought: 'پاسخ هلندی گرم و بدون تعارف به کامنت هانس‌هنک در زویدربورن',
+        thought: 'Engineering high-social-proof direct response and friction-free conversion copy.',
         scientific: 'Erin Meyer (The Culture Map) + Baymard Institute CRO Data',
-        recentArtifact: 'Nextdoor High-Social-Proof Response & New Story Letter',
+        recentArtifact: 'High-Social-Proof Community Response & Tailored Motivation Letter',
         zone: 'engineeringZone'
       },
       {
         id: 'pricing-strategist',
-        alias: 'قاسم (Ghasem)',
-        official: 'Pricing & Contracts',
+        shortName: 'Pricing Strategist',
+        official: 'Contracts & Pricing Lead',
         role: 'Value-Based Pricing & Commercial Contracts Lead',
         icon: '⚖️',
         avatarBg: 'from-violet-600 to-indigo-600',
         status: 'Margin Watch',
-        thought: 'طراحی قراردادهای رسمی هلندی با بند شروط فسخ سوبسید (BW)',
+        thought: 'Architecting 3-tier proposals with statutory conditional cancellation clauses.',
         scientific: 'Kahneman & Tversky Prospect Theory & ProfitWell Monetization',
         recentArtifact: '3-Tier Value Packaging (€495 / €1,190 / €2,450)',
         zone: 'engineeringZone'
       },
       {
         id: 'qa-auditor',
-        alias: 'تقی (Taghi)',
-        official: 'Lead QA & Privacy',
+        shortName: 'QA Auditor',
+        official: 'Lead QA & Compliance',
         role: 'Lead QA, Mobile Ergonomics & Privacy Auditor',
         icon: '🔍',
         avatarBg: 'from-rose-600 to-pink-600',
         status: 'Zero-Bug Lock',
-        thought: 'تست ارگونومی لمسی ۴۴×۴۴ پیکسل و تضمین عدم لود ترکینگ قبل کانسنت',
+        thought: 'Auditing 44x44px touch targets and ensuring zero tracking prior to explicit user opt-in.',
         scientific: 'Nielsen Norman Heuristics, Fitts Law, AVG/GDPR & WCAG 2.2 AA',
         recentArtifact: 'Strict Zero-Hallucination & SSR HTML Validation Report',
         zone: 'engineeringZone'
       },
       {
         id: 'ui-ux-architect',
-        alias: 'جمشید (Jamshid)',
-        official: 'Design & Motion',
+        shortName: 'UI/UX Architect',
+        official: 'Design & Motion Lead',
         role: 'Design Systems & 60fps Motion Systems Architect',
         icon: '🎨',
         avatarBg: 'from-fuchsia-600 to-purple-600',
         status: '60fps GPU Mode',
-        thought: 'رندرینگ سبک شیدرهای OGL WebGL Threads با صفر میلی‌ثانیه پرش CLS',
+        thought: 'Executing lightweight OGL WebGL shaders and hardware-accelerated compositor transitions.',
         scientific: 'Google Chrome RAIL Performance Model + Gestalt UI Hierarchy',
-        recentArtifact: 'Executive Two-Column CV Layout with Perfect Visual Ratio',
+        recentArtifact: 'Executive Two-Column Layout with Balanced Visual Density',
         zone: 'engineeringZone'
       },
       {
         id: 'linkedin-strategist',
-        alias: 'آقای آزادبخت (Azadbakht)',
-        official: 'B2B Thought Leader',
+        shortName: 'LinkedIn Strategist',
+        official: 'B2B Growth Architect',
         role: 'B2B Thought Leadership & Viral Storytelling Architect',
         icon: '🚀',
         avatarBg: 'from-blue-600 to-indigo-600',
         status: 'Hook Tuning',
-        thought: 'مهندسی قلاب‌های ۲ خطی موبایل برای تبدیل ایمپرشن به لید دایرکت',
+        thought: 'Engineering mobile thumb-stopping hooks to convert post impressions into qualified inbound leads.',
         scientific: 'Richard van der Blom Algorithm Study + Heath SUCCESs Model',
         recentArtifact: 'Agentic Development Thought-Leadership Narrative Frame',
         zone: 'engineeringZone'
@@ -290,7 +290,7 @@
         const zoneEl = document.getElementById(agent.zone);
         if (!zoneEl) return;
 
-        const displayName = isPersonalAlias ? agent.alias : agent.official;
+        const displayName = isDetailedName ? agent.official : agent.shortName;
         
         const card = document.createElement('div');
         card.id = `card-${agent.id}`;
@@ -323,7 +323,7 @@
       if (!agent) return;
 
       document.getElementById('inspectIcon').innerText = agent.icon;
-      document.getElementById('inspectName').innerText = isPersonalAlias ? agent.alias : agent.official;
+      document.getElementById('inspectName').innerText = isDetailedName ? agent.official : agent.shortName;
       document.getElementById('inspectRole').innerText = agent.role;
       document.getElementById('inspectScientific').innerText = agent.scientific;
       document.getElementById('inspectMindset').innerText = `"${agent.thought}"`;
@@ -339,12 +339,11 @@
       feed.prepend(item);
     }
 
-    // Trigger visual flash on active agent card
     function triggerAgentActivity(agentId, thought) {
       const card = document.getElementById(`card-${agentId}`);
       if (card) {
         card.classList.remove('active-flash');
-        void card.offsetWidth; // trigger reflow
+        void card.offsetWidth;
         card.classList.add('active-flash');
       }
       const thoughtEl = document.getElementById(`thought-${agentId}`);
@@ -357,7 +356,6 @@
       }
     }
 
-    // Live WebSocket Client Setup
     let socket = null;
     function connectLiveWebSocket() {
       const wsUrl = `ws://${window.location.hostname || '127.0.0.1'}:8000/ws`;
@@ -388,7 +386,6 @@
         document.getElementById('liveStatusText').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span> Standalone Mode (Run python server.py for live stream)`;
         document.getElementById('socketStatusBadge').innerText = 'Standalone Mode';
         document.getElementById('socketStatusBadge').className = 'text-[10px] text-amber-400 font-mono';
-        // Retry connection after 3s
         setTimeout(connectLiveWebSocket, 3000);
       };
 
@@ -398,19 +395,19 @@
     }
 
     document.getElementById('toggleNamesBtn').onclick = () => {
-      isPersonalAlias = !isPersonalAlias;
-      document.getElementById('namingModeLabel').innerText = isPersonalAlias 
-        ? 'Mode: Personal Aliases (هوشنگ، اکبر)' 
-        : 'Mode: Global Roles (Orchestrator, SEO)';
+      isDetailedName = !isDetailedName;
+      document.getElementById('namingModeLabel').innerText = isDetailedName 
+        ? 'Mode: Full Official Roles' 
+        : 'Mode: Standard Roles';
       renderOffice();
-      addEventLog(`Switched nomenclature to: ${isPersonalAlias ? 'Personal Aliases' : 'Global Roles'}`);
+      addEventLog(`Switched nomenclature to: ${isDetailedName ? 'Full Official Roles' : 'Standard Roles'}`);
     };
 
     document.getElementById('simulatePulseBtn').onclick = () => {
       const randIdx = Math.floor(Math.random() * agents.length);
       const targetAgent = agents[randIdx];
       triggerAgentActivity(targetAgent.id, 'Pinged via mission control. All systems operational.');
-      addEventLog(`⚡ Pinged ${targetAgent.alias} — Verified 100% active.`);
+      addEventLog(`⚡ Pinged ${targetAgent.shortName} — Verified 100% active.`);
     };
 
     renderOffice();
